@@ -37,10 +37,10 @@ HeaderQueue=POSIXipc.mqueue(['/Camera' Tid '_Header']);
 imsize=2*9600*6422;
 
 % connect to all existing /Camera shared segments
-s=dir(fullfile('/dev','shm',['C' Tid '_ringbuffer_*']));
-RingBuffer(1)=POSIXipc.shm(strrep(s(1),'/dev/shm',''),2*imsize);
+s=dir(fullfile('/dev','shm',['C' Tid '_image_ringbuffer_*']));
+RingBuffer(1)=POSIXipc.shm(strrep(s(1).name,'/dev/shm',''),imsize);
 for i=2:length(s)
-    RingBuffer(i)=POSIXipc.shm(strrep(s(i),'/dev/shm',''),2*imsize);
+    RingBuffer(i)=POSIXipc.shm(strrep(s(i).name,'/dev/shm',''),imsize);
 end
 
 
@@ -55,7 +55,7 @@ while true
     % first write flattened image data in buffer
     RingBufferIndex=mod(i-1,length(RingBuffer)+1);
     RingBuffer(RingBufferIndex).Data=...
-               typecast(AI.Image.Data,'uint8',1,2*imsize);
+               typecast(AI.Image.Data,'uint8',1,imsize);
     HeaderCell=AstroImage.HeaderData;
     % prepend buffer index like done by unitCS.treatNewImage
     HeaderCell=[{'RINGBUFI',RingBufferIndex,''};HeaderCell];

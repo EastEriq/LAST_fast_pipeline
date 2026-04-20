@@ -1,6 +1,6 @@
 [~,hostname]=system('hostname');
 if strcmp(hostname(1:4),'last')
-    Uid=hostname((end-2):(end-1));
+    Uid=hostname((end-3):(end-2)); %(trailing \n...)
     if strcmpi(hostname(end),'w')
         Cid='1'; % TODO, parameter 1:4
     else
@@ -16,10 +16,10 @@ end
 HeaderQueue=POSIXipc.mqueue(['/Camera' Tid '_Header']);
 
 % connect to all existing /Camera shared segments
-s=dir(fullfile('/dev','shm',['C' Tid '_ringbuffer_*']));
-RingBuffer(1)=POSIXipc.shm(strrep(s(1),'/dev/shm',''));
+s=dir(fullfile('/dev','shm',['C' Tid '_image_ringbuffer_*']));
+RingBuffer(1)=POSIXipc.shm(strrep(s(1).name,'/dev/shm',''));
 for i=2:length(s)
-    RingBuffer(i)=POSIXipc.shm(strrep(s(i),'/dev/shm',''));
+    RingBuffer(i)=POSIXipc.shm(strrep(s(i).name,'/dev/shm',''));
 end
     
 while true
@@ -37,9 +37,9 @@ while true
         RingBufferIndex=AI.HeaderData.getVal('RINGBUFI');
         w=AI.HeaderData.getVal('NAXIS1');
         h=AI.HeaderData.getVal('NAXIS2');
-        if contains(AI.Header.CAMNAME,'QHY')
+        if contains(AI.HeaderData.getVal('CAMNAME'),'QHY')
             % cast QHY buffer to image. See inst.QHYccd.unpackImgBuffer
-            AI.Image=reshape(typecast(RingBuffer(RingBufferIndex).Pointer,'uint16'),w,h);
+            AI.Image=reshape(typecast(RingBuffer(RingBufferIndex).Data,'uint16'),w,h);
         end
         fprintf('read image ... at time ... Ra,Dec ...\n')
         if AI.HeaderData.getVal('COUNTER')==1
