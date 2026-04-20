@@ -2,7 +2,7 @@
 if strcmp(hostname(1:4),'last')
     Uid=hostname((end-2):(end-1));
     if strcmpi(hostname(end),'w')
-        Cid='1';
+        Cid='1'; % TODO, parameter 1:4
     else
         Cid='3';
     end
@@ -14,6 +14,13 @@ end
 
 % connect to the headers queue
 HeaderQueue=POSIXipc.mqueue(['/Camera' Tid '_Header']);
+
+% connect to all existing /Camera shared segments
+s=dir(fullfile('/dev','shm',['C' Tid '_ringbuffer_*']));
+RingBuffer(1)=POSIXipc.shm(strrep(s(1),'/dev/shm',''));
+for i=2:length(s)
+    RingBuffer(i)=POSIXipc.shm(strrep(s(i),'/dev/shm',''));
+end
     
 while true
     if HeaderQueue.NumMessages>0
@@ -24,8 +31,23 @@ while true
             fprintf('invalid header in retrieved from queue\n')
             hc={};
         end
-        hc=reshape(hc,numel(hc)/3,3);
-        cell2struct(hc)
+        hc=reshape(hc,numel(hc)/3,3); % serializing with json flattens the cell
+        AI=AstroImage;
+        AI.HeaderData.Data=hc; % something to fill it with hc
+        RingBufferIndex=AI.HeaderData.getVal('RINGBUFI');
+        w=AI.HeaderData.getVal('NAXIS1');
+        h=AI.HeaderData.getVal('NAXIS2');
+        if contains(AI.Header.CAMNAME,'QHY')
+            % cast QHY buffer to image. See inst.QHYccd.unpackImgBuffer
+            AI.Image=reshape(typecast(RingBuffer(RingBufferIndex).Pointer,'uint16'),w,h);
+        end
+        fprintf('read image ... at time ... Ra,Dec ...\n')
+        if AI.HeaderData.getVal('COUNTER')==1
+            % do full astrometry and set up scenes
+        else
+            % do fast analysis
+            % if <some condition>, push a notification
+        end
     else
         pause(0.1)
     end
