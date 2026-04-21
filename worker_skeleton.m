@@ -1,7 +1,7 @@
 [~,hostname]=system('hostname');
 if strcmp(hostname(1:4),'last')
     Uid=hostname((end-3):(end-2)); %(trailing \n...)
-    if strcmpi(hostname(end),'w')
+    if strcmpi(hostname(end-1),'e')
         Cid='1'; % TODO, parameter 1:4
     else
         Cid='3';
@@ -39,9 +39,13 @@ while true
         h=AI.HeaderData.getVal('NAXIS2');
         if contains(AI.HeaderData.getVal('CAMNAME'),'QHY')
             % cast QHY buffer to image. See inst.QHYccd.unpackImgBuffer
+            if RingBuffer(RingBufferIndex).Size > 2*w*h
+                reshape(RingBuffer(RingBufferIndex).Pointer,1,2*w*h);
+            end
             AI.Image=reshape(typecast(RingBuffer(RingBufferIndex).Data,'uint16'),w,h);
         end
-        fprintf('read image ... at time ... Ra,Dec ...\n')
+        fprintf('read image %#4d at JD %10.5f Ra,Dec ...\n',...
+                AI.HeaderData.getVal('COUNTER'),AI.HeaderData.getVal('JD'))
         if AI.HeaderData.getVal('COUNTER')==1
             % do full astrometry and set up scenes
         else
