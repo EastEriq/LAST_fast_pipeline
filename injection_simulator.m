@@ -12,7 +12,7 @@ imsize=2*9600*6422;
 
 % periodically enqueue the contents of one of the files
 %  to be exact in times I could better use a timed function
-f=dir(fullfile(imdir,'*.fits'));
+f=dir(fullfile(imdir,'*sci_raw_Image_1.fits*'));
 i=1;
 dt=2; %sec
 while true
