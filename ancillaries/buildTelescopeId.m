@@ -9,13 +9,13 @@ end
 hostname=strrep(hostname,newline,'');
 
 if strcmp(hostname(1:4),'last')
-    Uid=eval(hostname((end-2):(end-1)));
+    Uid=hostname((end-2):(end-1));
     switch hostname(end)
-        case 'w'
+        case 'e'
             if isempty(Cid)
                 Cid='1';
             end
-        case 'e'
+        case 'w'
             if isempty(Cid)
                 Cid='3';
             end
