@@ -11,13 +11,14 @@
 % to a parallel pool of workers, and in case, work out how they report and
 % reassemble the analysis results
 
+AI=AstroImage; % out of the loop because initialisation is expensive
+
 while true % or add a stopping signal or condition
     if HeaderQueue.NumMessages>0
         jh=HeaderQueue.receive;
         try
             hc=jsondecode(jh);
             hc=reshape(hc,numel(hc)/3,3); % serializing with json flattens the cell
-            AI=AstroImage;
             AI.HeaderData.Data=hc; % something to fill it with hc
             RingBufferIndex=AI.HeaderData.getVal('RINGBUFI');
             w=AI.HeaderData.getVal('NAXIS1');
