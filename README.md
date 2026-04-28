@@ -46,7 +46,7 @@ message queues and shared memory segments.
 - In a different matlab session, run `worker_skeleton`. This will also run till
   interrupted with Ctrl-C, and report the images which it dequeues and reads.
 
-### On a non last machine:
+### On a non LAST machine:
 
 - Copy several LAST images into a directory of your choice. Likely, you'd want to
   work with `*sci_raw_Image_1.fits*` files (compressed or not).
@@ -56,6 +56,25 @@ message queues and shared memory segments.
   `worker_skeleton`. Both scripts will run till interrupted with Ctrl-C. The first
   one will cyclically enqueue a new image from `imdir` every couple of seconds; the second
   one will report the images which it dequeues and reads.
+
+## POSIX interprocess infrastructure
+
+For each activated camera, we're making use of:
+
+- one POSIX queue, named `/dev/mqueue/Camera`_UU_1_C_`_Header`, where _UU_1_C_ is the canonical camera identifier (e.g. `04_1_2`). Note that the default maximum depth of POSIX queues on most
+linux systems is limited (10 elements), but can be increased
+[like explained e.g. here](https://github.com/EastEriq/matlab-posix-mqueue#notes).
+- N shared memory segments, shown by the OS under the `tmpfs` mount point `/dev/shm/`
+  as virtual files, with names like `C`_UU_1_C__image_ringbuffer_`_n_, with _UU_1_C_ as 
+  above and n=1...N. In the example, N=10. Each of these segments takes as much RAM as
+  one camera image, i.e. 118MB for the QHY600 full frame.
+
+Both kind of objects are created the first time that a live exposure is called for the
+given camera.
+
+These virtual files can be deleted with `rm` as if they were normal
+files, but the matlab classes `POSIXipc.mqueue` and `POSIXipc.shm`
+have proper methods for destroying them.
 
 
 ## TBD:
