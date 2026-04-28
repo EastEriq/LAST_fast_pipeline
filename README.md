@@ -65,7 +65,7 @@ For each activated camera, we're making use of:
 linux systems is limited (10 elements), but can be increased
 [like explained e.g. here](https://github.com/EastEriq/matlab-posix-mqueue#notes).
 - N shared memory segments, shown by the OS under the `tmpfs` mount point `/dev/shm/`
-  as virtual files, with names like `C`_UU_1_C__image_ringbuffer_`_n_, with _UU_1_C_ as 
+  as virtual files, with names like `C`_UU_1_C_`_image_ringbuffer_`_n_, with _UU_1_C_ as 
   above and n=1...N. In the example, N=10. Each of these segments takes as much RAM as
   one camera image, i.e. 118MB for the QHY600 full frame.
 
