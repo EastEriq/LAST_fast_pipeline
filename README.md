@@ -25,7 +25,7 @@ message queues and shared memory segments.
   via the superunit like customarily done during observation nights.
 - pass to all desired cameras the magic parameter `Unit.Camera{i}.SharedRingBufferDim`. Any
   positive integer value enables image sharing. You may want e.g. to give in the superunit
-  session `S.send('for i=1:4; Unit.Camera{i}.SharedRingBufferDim=10); end')`
+  session `S.send("for i=1:4; Unit.Camera{i}.classCommand('SharedRingBufferDim=10'); end")`
 - images taken during a live mode acquisition (e.g., `Unit.takeExposure([],1,100)`) will
   be automatically shared among processes.
 - in a separate matlab session on the east or west unit computer, run `worker_skeleton`.
